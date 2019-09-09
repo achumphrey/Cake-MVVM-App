@@ -1,6 +1,7 @@
 package com.example.cakemvvmapp.view
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.cakemvvmapp.model.CakeModel
 import com.example.cakemvvmapp.network.ClientInterface
@@ -13,9 +14,8 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 class CakeModelViewModel : ViewModel() {
-    // TODO: Implement the ViewModel
-    private var cakeList: List<CakeModel>? = null
 
+    private var cakeList: MutableLiveData<List<CakeModel>>? = MutableLiveData()
     var compositeDisposable = CompositeDisposable()
     lateinit var disposable: Disposable
 
@@ -34,38 +34,35 @@ class CakeModelViewModel : ViewModel() {
      //       .subscribe({t-> onShowList(t)}, {showError()})
     }
 
-    fun onShowList() : List<CakeModel>?{
 
+    fun onShowList() : MutableLiveData<List<CakeModel>>?{
         return cakeList
     }
 
-    private fun cakeList(listCake: List<CakeModel>) {
+    private fun MakeCakeList(listCake: List<CakeModel>) {
         Log.i(TAG, "${listCake[1].title}")
-        cakeList = listCake
+        cakeList?.value = listCake
     }
-
 
     override fun onCleared() {
         super.onCleared()
         Log.i(TAG, "ViewModel destroyed")
     }
 
-
     private fun cakeObserver(): Observer<List<CakeModel>> {
 
         return object : Observer<List<CakeModel>> {
-            override fun onComplete() {
 
+            override fun onComplete() {
             }
 
             override fun onSubscribe(d: Disposable) {
                 disposable = d
-
             }
 
             override fun onNext(t: List<CakeModel>) {
                 Log.i(TAG, "${t[0].title}")
-                cakeList(t)
+                MakeCakeList(t)
             }
 
             override fun onError(e: Throwable) {
