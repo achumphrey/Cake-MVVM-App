@@ -31,16 +31,24 @@ class CakeModelFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(CakeModelViewModel::class.java)
         viewModel.processCall()
         val cakeList : MutableLiveData<List<CakeModel>>? = viewModel.onShowList()
+        val checkProgress : MutableLiveData<Boolean>? = viewModel.getShowProgress()
+
+        checkProgress?.observe(this, object : Observer<Boolean>{
+            override fun onChanged(t: Boolean?) {
+                if (t == false)
+                    prgs_bar.visibility = View.GONE
+                else
+                    prgs_bar.visibility = View.VISIBLE
+            }
+        })
 
         cakeList?.observe(this, object: Observer<List<CakeModel>> {
             override fun onChanged(t: List<CakeModel>?) {
                 Log.i("CakeFragment","${t?.get(0)?.title}")
 
-
                 val adapter = CakeAdapter(t!!)
                 rv_list.layoutManager = LinearLayoutManager(activity)
                 rv_list.adapter = adapter
-                prgs_bar.visibility = View.GONE
             }
         })
         return inflater.inflate(R.layout.cake_model_fragment, container, false)
@@ -53,12 +61,16 @@ class CakeModelFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        prgs_bar.visibility = View.VISIBLE
         error_include.visibility = View.GONE
     }
 
     override fun onResume() {
         super.onResume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.onDestroy()
     }
 }
 
