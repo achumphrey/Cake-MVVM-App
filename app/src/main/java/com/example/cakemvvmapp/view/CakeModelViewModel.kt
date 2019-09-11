@@ -1,10 +1,10 @@
 package com.example.cakemvvmapp.view
 
+import android.app.Application
 import android.util.Log
-import android.view.View
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.example.cakemvvmapp.R
+import com.example.cakemvvmapp.database.CakeDatabase
 import com.example.cakemvvmapp.model.CakeModel
 import com.example.cakemvvmapp.network.ClientInterface
 import com.example.cakemvvmapp.network.RetrofitInstance
@@ -14,18 +14,45 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.cake_model_fragment.*
 
 
-class CakeModelViewModel : ViewModel() {
+class CakeModelViewModel (application: Application) : AndroidViewModel(application) {
 
     private var cakeList: MutableLiveData<List<CakeModel>>? = MutableLiveData()
+     var cakeListFromDb: MutableLiveData<List<CakeModel>>? = MutableLiveData()
     private var showProgress: MutableLiveData<Boolean>? = MutableLiveData()
     var compositeDisposable = CompositeDisposable()
     lateinit var disposable: Disposable
+    private var showDBSuccess: MutableLiveData<Boolean>? = MutableLiveData()
+    var cakeDao = CakeDatabase.getDatabase(application)?.cakeDao()
 
     fun getShowProgress():MutableLiveData<Boolean>?{
         return showProgress
+    }
+
+    fun getShowDBSuccess(): MutableLiveData<Boolean>?{
+        return showDBSuccess
+    }
+
+   private fun addCakeToDatabase(cakeModel: List<CakeModel>){
+        compositeDisposable.add(
+            cakeDao!!.insertUser(cakeModel)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({showDBSuccess?.value = true},{
+                    Log.i("ViewModel error",it.message)
+                    showDBSuccess?.value=false})
+        )
+    }
+
+    fun getAllCakesFromDb(){
+        compositeDisposable.add(
+            cakeDao!!.getAllCakes()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({cakes -> cakeListFromDb?.value = cakes
+                    showDBSuccess?.value = true })
+        )
     }
 
     fun processCall() {
@@ -37,6 +64,8 @@ class CakeModelViewModel : ViewModel() {
 
         val cakeModelObservable: Observable<List<CakeModel>>
                 = cakeModelInterface.getCakeRecords()
+
+
 
         cakeModelObservable
             .subscribeOn(Schedulers.io())
@@ -54,6 +83,7 @@ class CakeModelViewModel : ViewModel() {
     private fun makeCakeList(listCake: List<CakeModel>) {
         Log.i(TAG, "${listCake[1].title}")
         cakeList?.value = listCake
+        addCakeToDatabase(listCake)
     }
 
     override fun onCleared() {

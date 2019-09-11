@@ -24,3 +24,13 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 }
+
+
+/*
+-Add room database to it
+-When the data is received from api,insert it into the database
+-In your activity or fragment,add some logic to check if there is internet connection ( google is your friend :) )
+-if there is internet,load data from retrofit
+if no connection,load data from room
+-INTO THE RECYCLERVIEW
+*/
