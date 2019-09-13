@@ -14,9 +14,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
 
-class CakeModelViewModel (application: Application) : AndroidViewModel(application) {
+class CakeModelViewModel @Inject constructor(val clientInterface: ClientInterface, application: Application) : AndroidViewModel(application) {
 
     private var cakeList: MutableLiveData<List<CakeModel>>? = MutableLiveData()
      var cakeListFromDb: MutableLiveData<List<CakeModel>>? = MutableLiveData()

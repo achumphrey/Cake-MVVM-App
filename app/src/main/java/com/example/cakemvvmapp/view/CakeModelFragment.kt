@@ -14,18 +14,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.cakemvvmapp.dagger.DaggerCakeViewAPPComponent
+import com.example.cakemvvmapp.dagger.MyApplication
+import com.example.cakemvvmapp.dagger.NetworkModule
 import com.example.cakemvvmapp.model.CakeModel
 import kotlinx.android.synthetic.main.cake_model_fragment.*
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import javax.inject.Inject
 
 
 class CakeModelFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = CakeModelFragment()
-    }
+    @Inject
+    lateinit var cakeModelViewFactory: CakeModelViewFactory
 
     private lateinit var viewModel: CakeModelViewModel
 
@@ -34,12 +37,15 @@ class CakeModelFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-  //      var isThereInternet = verifyAvailableNetwork(AppCompatActivity())
+        DaggerCakeViewAPPComponent.builder()
+            .networkModule(NetworkModule(activity!!.application as MyApplication))
+            .build()
+            .inject(this)
 
-   //     Log.d("CakeModelFrag", "$isThereInternet")
 
 
-        viewModel = ViewModelProviders.of(this).get(CakeModelViewModel::class.java)
+
+        viewModel = ViewModelProviders.of(this, cakeModelViewFactory).get(CakeModelViewModel::class.java)
 //        viewModel.processCall()
         viewModel.getAllCakesFromDb()
         val cakeList : MutableLiveData<List<CakeModel>>? = viewModel.onShowList()
