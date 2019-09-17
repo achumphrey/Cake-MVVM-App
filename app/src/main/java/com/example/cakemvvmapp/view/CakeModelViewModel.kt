@@ -20,11 +20,12 @@ import javax.inject.Inject
 class CakeModelViewModel @Inject constructor(val clientInterface: ClientInterface, application: Application) : AndroidViewModel(application) {
 
     private var cakeList: MutableLiveData<List<CakeModel>>? = MutableLiveData()
-     var cakeListFromDb: MutableLiveData<List<CakeModel>>? = MutableLiveData()
+    var cakeListFromDb: MutableLiveData<List<CakeModel>>? = MutableLiveData()
     private var showProgress: MutableLiveData<Boolean>? = MutableLiveData()
     var compositeDisposable = CompositeDisposable()
     lateinit var disposable: Disposable
     private var showDBSuccess: MutableLiveData<Boolean>? = MutableLiveData()
+    private var showDBAddSuccess: MutableLiveData<Boolean>? = MutableLiveData()
     var cakeDao = CakeDatabase.getDatabase(application)?.cakeDao()
 
     fun getShowProgress():MutableLiveData<Boolean>?{
@@ -35,12 +36,16 @@ class CakeModelViewModel @Inject constructor(val clientInterface: ClientInterfac
         return showDBSuccess
     }
 
-   private fun addCakeToDatabase(cakeModel: List<CakeModel>){
+    fun getShowDBAddSuccess(): MutableLiveData<Boolean>?{
+        return showDBAddSuccess
+    }
+
+    fun addCakeToDatabase(cakeModel: List<CakeModel>){
         compositeDisposable.add(
-            cakeDao!!.insertUser(cakeModel)
+            cakeDao!!.insertCake(cakeModel)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({showDBSuccess?.value = true},{
+                .subscribe({showDBAddSuccess?.value = true},{
                     Log.i("ViewModel error",it.message)
                     showDBSuccess?.value=false})
         )
@@ -51,8 +56,8 @@ class CakeModelViewModel @Inject constructor(val clientInterface: ClientInterfac
             cakeDao!!.getAllCakes()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({cakes -> cakeListFromDb?.value = cakes
-                    showDBSuccess?.value = true })
+                .subscribe({cakes -> cakeListFromDb?.postValue(cakes)
+                    showDBSuccess?.value = true },{showDBSuccess?.postValue(false)})
         )
     }
 
@@ -60,11 +65,14 @@ class CakeModelViewModel @Inject constructor(val clientInterface: ClientInterfac
 
         showProgress?.value = true
 
-        val cakeModelInterface =
+  /*      val cakeModelInterface =
             RetrofitInstance().retrofitInstance.create(ClientInterface::class.java)
 
         val cakeModelObservable: Observable<List<CakeModel>>
                 = cakeModelInterface.getCakeRecords()
+*/
+        val cakeModelObservable: Observable<List<CakeModel>>
+                = clientInterface.getCakeRecords()
 
 
 
@@ -84,6 +92,7 @@ class CakeModelViewModel @Inject constructor(val clientInterface: ClientInterfac
     private fun makeCakeList(listCake: List<CakeModel>) {
         Log.i(TAG, "${listCake[1].title}")
         cakeList?.value = listCake
+
         addCakeToDatabase(listCake)
     }
 

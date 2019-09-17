@@ -52,6 +52,7 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.12'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
 
+
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"

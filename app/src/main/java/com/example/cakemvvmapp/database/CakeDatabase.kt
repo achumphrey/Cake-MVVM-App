@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.cakemvvmapp.model.CakeModel
 
-@Database(entities = arrayOf(CakeModel::class), version = 1)
+@Database(entities = arrayOf(CakeModel::class), version = 1,exportSchema = false)
 abstract class CakeDatabase: RoomDatabase() {
 
     abstract fun cakeDao():CakeDAO

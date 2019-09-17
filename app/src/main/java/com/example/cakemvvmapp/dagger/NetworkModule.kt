@@ -9,6 +9,7 @@ import dagger.Provides
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
@@ -17,11 +18,13 @@ class NetworkModule(private val application: MyApplication) {
 
     @Provides
     @Singleton
-    fun provideRetrofit(): Retrofit{
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit{
 
         return Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .client(okHttpClient)
             .build()
 
     }
@@ -48,9 +51,5 @@ class NetworkModule(private val application: MyApplication) {
     @Singleton
     fun provideApplicationContext(): Application = application
 
-    @Provides
-    @Singleton
-    fun provideCakeViewModelFactory(clientInterface: ClientInterface, application: Application): CakeModelViewFactory{
-       return CakeModelViewFactory(clientInterface, application)
-    }
+
 }

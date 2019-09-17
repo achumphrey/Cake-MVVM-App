@@ -5,8 +5,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = arrayOf(NetworkModule::class))
-interface CakeViewAPPComponent {
-
-    fun inject(myApplication: MyApplication)
+@Component(modules = arrayOf(FragmentModule::class, NetworkModule::class))
+interface FragmentComponent {
+    fun inject(cakeModelFragment: CakeModelFragment)
 }

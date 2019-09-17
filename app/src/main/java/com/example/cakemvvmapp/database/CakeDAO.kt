@@ -12,11 +12,15 @@ import io.reactivex.Flowable
 interface CakeDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertUser(cakeModel: List<CakeModel>): Completable
+    fun insertCake(cake: List<CakeModel>): Completable
 
     @Query("Select * from cake_table")
     fun getAllCakes(): Flowable<List<CakeModel>>
 
     @Query("select * from cake_table where title = :title")
     fun getByTitle(title:String): Flowable<CakeModel>
+
+    @Query("delete  from cake_table")
+    fun deleteTable(): Completable
+
 }
